@@ -6,11 +6,6 @@
     pkgs.openssl
   ];
   env = {};
-  services.firebase.emulators = {
-    detect = true;
-    projectId = "demo-app";
-    services = ["auth" "firestore"];
-  };
   idx = {
     extensions = [
       # "vscodevim.vim"
@@ -27,7 +22,7 @@
       previews = [
         {
           command = "npm run dev";
-          port = 3000;
+          port = 9002;
           label = "web";
         }
       ];
