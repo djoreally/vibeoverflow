@@ -1,13 +1,13 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Code2, Menu, Sparkles } from 'lucide-react';
+import { Code2, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const navLinks = [
   { href: '/case-studies', label: 'Case Studies' },
@@ -48,28 +48,31 @@ export function Header() {
             <NavLink key={link.href} href={link.href} label={link.label} />
           ))}
         </nav>
-        <div className="flex flex-1 items-center justify-end gap-2 md:hidden">
-          <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <div className="p-4">
-                <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setMenuOpen(false)}>
-                  <Code2 className="h-6 w-6 text-primary" />
-                  <span className="font-bold font-headline text-lg">AI Toolbench</span>
-                </Link>
-                <nav className="flex flex-col gap-6">
-                  {navLinks.map((link) => (
-                    <NavLink key={link.href} href={link.href} label={link.label} isMobile />
-                  ))}
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <ThemeToggle />
+          <div className="md:hidden">
+            <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Open Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <div className="p-4">
+                  <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setMenuOpen(false)}>
+                    <Code2 className="h-6 w-6 text-primary" />
+                    <span className="font-bold font-headline text-lg">AI Toolbench</span>
+                  </Link>
+                  <nav className="flex flex-col gap-6">
+                    {navLinks.map((link) => (
+                      <NavLink key={link.href} href={link.href} label={link.label} isMobile />
+                    ))}
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
