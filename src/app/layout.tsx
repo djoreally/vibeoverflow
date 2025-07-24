@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
+import NextAuthProvider from '@/components/session-provider'; // Import the provider
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
@@ -17,8 +18,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  session, // Add session to props
 }: Readonly<{
   children: React.ReactNode;
+  session: any; // Add session to props
 }>) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
@@ -34,12 +37,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
+          <NextAuthProvider session={session}> {/* Wrap with the provider */}
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>
