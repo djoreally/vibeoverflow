@@ -5,7 +5,9 @@
     pkgs.zulu
     pkgs.openssl
   ];
-  env = {};
+  env = {
+    PRISMA_CLI_QUERY_ENGINE_TYPE = "binary";
+  };
   idx = {
     extensions = [
       # "vscodevim.vim"
@@ -16,16 +18,6 @@
           "src/app/page.tsx"
         ];
       };
-    };
-    previews = {
-      enable = true;
-      previews = [
-        {
-          command = "npm run dev";
-          port = 9002;
-          label = "web";
-        }
-      ];
     };
   };
 }
