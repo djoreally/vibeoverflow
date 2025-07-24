@@ -1,41 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Code2, Menu, LogIn, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const navLinks = [
-  { href: '/case-studies', label: 'Case Studies' },
-  { href: '/tutorials', label: 'Tutorials' },
-  { href: '/learning-center', label: 'Learning Center' },
-  { href: '/recommendations', label: 'For You' },
-];
-
 export function Header() {
-  const pathname = usePathname();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { data: session, status } = useSession();
-
-  const NavLink = ({ href, label, isMobile }: { href: string; label: string; isMobile?: boolean }) => (
-    <Link
-      href={href}
-      onClick={() => isMobile && setMenuOpen(false)}
-      className={cn(
-        'transition-colors hover:text-primary',
-        pathname === href ? 'text-primary font-semibold' : 'text-muted-foreground',
-        isMobile ? 'text-lg' : 'text-sm font-medium'
-      )}
-    >
-      {label}
-    </Link>
-  );
 
   const AuthButton = ({ isMobile }: { isMobile?: boolean }) => {
     if (status === 'loading') {
@@ -74,16 +50,10 @@ export function Header() {
             <span className="font-bold font-headline text-lg">AI Toolbench</span>
           </Link>
         </div>
-        <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
-            <NavLink key={link.href} href={link.href} label={link.label} />
-          ))}
-        </nav>
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="hidden md:flex">
             <AuthButton />
           </div>
-          <ThemeToggle />
           <div className="md:hidden">
             <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -98,12 +68,9 @@ export function Header() {
                     <Code2 className="h-6 w-6 text-primary" />
                     <span className="font-bold font-headline text-lg">AI Toolbench</span>
                   </Link>
-                  <nav className="flex flex-col gap-6 mb-8">
-                    {navLinks.map((link) => (
-                      <NavLink key={link.href} href={link.href} label={link.label} isMobile />
-                    ))}
-                  </nav>
-                  <AuthButton isMobile />
+                  <div className="mb-8">
+                    <AuthButton isMobile />
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
