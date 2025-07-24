@@ -1,47 +1,76 @@
-import NextAuth from "next-auth"
-import EmailProvider from "next-auth/providers/email"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
-import { Resend } from "resend"
-
-const prisma = new PrismaClient()
-const resend = new Resend(process.env.RESEND_API_KEY)
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import prisma from '@/lib/prisma';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD
-        }
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "Email", type: "text" },
+        code: { label: "Code", type: "text" },
       },
-      from: process.env.EMAIL_FROM,
-       sendVerificationRequest: async ({ identifier, url, provider }) => {
-        const { host } = new URL(url);
-        await resend.emails.send({
-          from: provider.from,
-          to: identifier,
-          subject: `Sign in to ${host}`,
-          text: `Sign in to ${host}
-${url}
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.code) {
+          return null;
+        }
 
-`,
-          html: `<p>Sign in to ${host}</p><p><a href="${url}">Click here to sign in</a></p>`,
+        const verificationToken = await prisma.verificationToken.findUnique({
+          where: {
+            identifier_token: {
+              identifier: credentials.email,
+              token: credentials.code,
+            },
+          },
         });
+
+        if (!verificationToken || verificationToken.expires < new Date()) {
+            return null; // Token is invalid or expired
+        }
+
+        // Clean up the token after use
+        await prisma.verificationToken.delete({
+            where: {
+                identifier_token: {
+                    identifier: credentials.email,
+                    token: credentials.code,
+                }
+            }
+        });
+
+        let user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email: credentials.email,
+              emailVerified: new Date(),
+            },
+          });
+        } else if (!user.emailVerified) {
+            user = await prisma.user.update({
+                where: { email: credentials.email },
+                data: { emailVerified: new Date() }
+            });
+        }
+        
+        return user;
       },
     }),
   ],
   pages: {
     signIn: '/auth/signin',
-    verifyRequest: '/auth/verify-request',
+  },
+  session: {
+    strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+};
 
-const handler = NextAuth(authOptions)
+const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
